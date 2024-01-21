@@ -16,7 +16,7 @@ logging.basicConfig(
 def start(update: Update, context: CallbackContext):
     context.bot.send_message(
         chat_id=update.effective_chat.id,
-        text="Hola! Today I'm your support bot <3"
+        text="Я — бот поддержки издательства \"Игра Глаголов\"\nЧем я могу помочь?"
     )
 
 
