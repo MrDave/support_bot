@@ -1,6 +1,10 @@
 # Game of Verbs support bot
 Support bot for Game of Verbs with DialogueFlow at its core
 
+See for yourself:
+- [Telegram bot](https://t.me/GameOfVerbsSupportBot)
+- [VK bot](https://vk.com/im?sel=-224351051)
+
 ## How to install
 Python should already be installed. This project is tested on Python 3.11. You may use other versions as you will, but YMMV.
 
@@ -78,6 +82,12 @@ python vk_bot.py  # launches VK bot
 ```
 
 For Telegram bot to be able to send messages, send it a `/start` command
+
+Telegram bot example:  
+![Telegram example](https://dvmn.org/filer/canonical/1569214094/323/)
+
+Vkontakte bot example:  
+![VK example](https://dvmn.org/filer/canonical/1569214089/322/)
 
 ## Project Goals
 
