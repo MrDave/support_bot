@@ -1,4 +1,5 @@
 import logging
+import os
 
 from environs import Env
 from google.cloud import dialogflow
@@ -53,6 +54,7 @@ def main():
     telegram_logging_token = env.str("TELEGRAM_LOGGING_BOT_TOKEN")
     project_id = env.str("PROJECT_ID")
     tg_user_id = env.str("TELEGRAM_USER_ID")
+    os.environ["GOOGLE_CLOUD_PROJECT"] = project_id
 
     updater = Updater(telegram_token)
     dp = updater.dispatcher

@@ -1,4 +1,5 @@
 import logging
+import os
 import random
 
 import vk_api as vk
@@ -43,6 +44,7 @@ def main():
     project_id = env.str("PROJECT_ID")
     telegram_logging_token = env.str("TELEGRAM_LOGGING_BOT_TOKEN")
     tg_user_id = env.str("TELEGRAM_USER_ID")
+    os.environ["GOOGLE_CLOUD_PROJECT"] = project_id
 
     log_level = env.log_level("LOGGING_LEVEL", logging.WARNING)
     logger.setLevel(level=log_level)
