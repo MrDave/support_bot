@@ -5,12 +5,19 @@ from google.cloud import dialogflow
 from telegram import Update
 from telegram.ext import Updater, CallbackContext, CommandHandler, MessageHandler, Filters
 
-logging.basicConfig(
-    filename="telegram_bot.log",
-    format="%(asctime)s %(message)s",
-    datefmt="%d/%m/%Y %I:%M:%S %p",
-    level=logging.WARNING
-)
+logger = logging.getLogger()
+
+
+class TelegramLogsHandler(logging.Handler):
+
+    def __init__(self, tg_bot, chat_id):
+        super().__init__()
+        self.tg_bot = tg_bot
+        self.chat_id = chat_id
+
+    def emit(self, record):
+        log_entry = self.format(record)
+        self.tg_bot.send_message(chat_id=self.chat_id, text=log_entry)
 
 
 def start(update: Update, context: CallbackContext):
@@ -43,10 +50,17 @@ def main():
     env.read_env()
 
     telegram_token = env.str("TELEGRAM_BOT_TOKEN")
+    telegram_logging_token = env.str("TELEGRAM_LOGGING_BOT_TOKEN")
     project_id = env.str("PROJECT_ID")
+    tg_user_id = env.str("TELEGRAM_USER_ID")
 
     updater = Updater(telegram_token)
     dp = updater.dispatcher
+
+    log_level = env.log_level("LOGGING_LEVEL", logging.WARNING)
+    logger.setLevel(level=log_level)
+    logger_bot = Updater(telegram_logging_token).dispatcher.bot
+    logger.addHandler(TelegramLogsHandler(logger_bot, tg_user_id))
 
     dp.bot_data["project_id"] = project_id
     dp.update_persistence()

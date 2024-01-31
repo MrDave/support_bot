@@ -16,10 +16,13 @@ pip install -r requirements.txt
 Set up environmental variables.  
 Create `.env` file in root folder and write down the following variables:
 - `TELEGRAM_BOT_TOKEN` - Access token of your bot. You get one from [BotFather Telegram bot](https://t.me/BotFather) when you create a bot.
+- `TELEGRAM_LOGGING_BOT_TOKEN` - same as above, but used for sending logs. Can be the same bot or separate as the main one.
 - `VK_GROUP_TOKEN` - Access token of your VK group. Get it from the group's settings.
 - `PROJECT_ID` - Google Cloud project's ID
 - `GOOGLE_APPLICATION_CREDENTIALS` - Filepath to `credentials.json` of your Google Cloud project. See below how to get it.
 - `DIALOG_FLOW_API_KEY` - DialogueFlow's access token. See below how to get it.
+- `LOGGING_LEVEL` - Desired [logging level](https://docs.python.org/3/library/logging.html#logging-levels)
+- `TELEGRAM_USER_ID` - Your numeric Telegram ID. Can be checked by writing to special [user info bot](https://t.me/userinfobot). Used to recieve logs.
 
 
 ### Setting up Google Project

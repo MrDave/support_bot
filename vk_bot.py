@@ -3,15 +3,13 @@ import random
 
 import vk_api as vk
 from environs import Env
-from vk_api.longpoll import VkLongPoll, VkEventType
 from google.cloud import dialogflow
+from telegram.ext import Updater
+from vk_api.longpoll import VkLongPoll, VkEventType
 
-logging.basicConfig(
-    filename="vk_bot.log",
-    format="%(asctime)s %(message)s",
-    datefmt="%d/%m/%Y %I:%M:%S %p",
-    level=logging.WARNING
-)
+from telegram_bot import TelegramLogsHandler
+
+logger = logging.getLogger()
 
 
 def detect_intent_text(text, project_id, session_id):
@@ -43,13 +41,25 @@ def main():
 
     vk_token = env.str("VK_GROUP_TOKEN")
     project_id = env.str("PROJECT_ID")
+    telegram_logging_token = env.str("TELEGRAM_LOGGING_BOT_TOKEN")
+    tg_user_id = env.str("TELEGRAM_USER_ID")
+
+    log_level = env.log_level("LOGGING_LEVEL", logging.WARNING)
+    logger.setLevel(level=log_level)
+    logger_bot = Updater(telegram_logging_token).dispatcher.bot
+    logger.addHandler(TelegramLogsHandler(logger_bot, tg_user_id))
 
     vk_session = vk.VkApi(token=vk_token)
     vk_api = vk_session.get_api()
     longpoll = VkLongPoll(vk_session)
-    for event in longpoll.listen():
-        if event.type == VkEventType.MESSAGE_NEW and event.to_me:
-            flow_dialogue(event, vk_api, project_id)
+    while True:
+        try:
+            for event in longpoll.listen():
+                if event.type == VkEventType.MESSAGE_NEW and event.to_me:
+                    flow_dialogue(event, vk_api, project_id)
+        except Exception as e:
+            logger.exception(f"Бот поддержки VK упал с ошибкой:\n")
+            continue
 
 
 if __name__ == '__main__':
