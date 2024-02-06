@@ -2,23 +2,13 @@ import logging
 import os
 
 from environs import Env
-from google.cloud import dialogflow
 from telegram import Update
 from telegram.ext import Updater, CallbackContext, CommandHandler, MessageHandler, Filters
 
+from dialog_flow_helpers import detect_intent_text
+from telegram_helpers import TelegramLogsHandler
+
 logger = logging.getLogger()
-
-
-class TelegramLogsHandler(logging.Handler):
-
-    def __init__(self, tg_bot, chat_id):
-        super().__init__()
-        self.tg_bot = tg_bot
-        self.chat_id = chat_id
-
-    def emit(self, record):
-        log_entry = self.format(record)
-        self.tg_bot.send_message(chat_id=self.chat_id, text=log_entry)
 
 
 def start(update: Update, context: CallbackContext):
@@ -28,22 +18,11 @@ def start(update: Update, context: CallbackContext):
     )
 
 
-def flow_dialogue(update: Update, context: CallbackContext):
+def process_dialogue(update: Update, context: CallbackContext):
     text = update.message.text
     project_id = context.bot_data["project_id"]
-    reply_text = detect_intent_text(text, project_id, update.effective_chat.id)
+    reply_text = detect_intent_text(text, project_id, update.effective_chat.id).query_result.fulfillment_text
     update.message.reply_text(reply_text)
-
-
-def detect_intent_text(text, project_id, session_id):
-    session_client = dialogflow.SessionsClient()
-    session = session_client.session_path(project_id, session_id)
-    text_input = dialogflow.TextInput(text=text, language_code="RU")
-    query_input = dialogflow.QueryInput(text=text_input)
-    response = session_client.detect_intent(
-        request={"session": session, "query_input": query_input}
-    )
-    return response.query_result.fulfillment_text
 
 
 def main():
@@ -68,7 +47,7 @@ def main():
     dp.update_persistence()
 
     dp.add_handler(CommandHandler("start", start))
-    dp.add_handler(MessageHandler(Filters.text & ~Filters.command, flow_dialogue))
+    dp.add_handler(MessageHandler(Filters.text & ~Filters.command, process_dialogue))
 
     updater.start_polling()
 

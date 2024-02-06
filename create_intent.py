@@ -1,8 +1,16 @@
 import argparse
 import json
+import logging
 
 from environs import Env
 from google.cloud import dialogflow
+from google.api_core.exceptions import InvalidArgument
+
+logging.basicConfig(
+    format="%(asctime)s %(message)s",
+    datefmt="%d/%m/%Y %I:%M:%S %p",
+    level=logging.WARNING
+)
 
 
 def create_intent(project_id, display_name, training_phrases_parts, message_texts):
@@ -14,7 +22,7 @@ def create_intent(project_id, display_name, training_phrases_parts, message_text
     training_phrases = []
     for training_phrases_part in training_phrases_parts:
         part = dialogflow.Intent.TrainingPhrase.Part(text=training_phrases_part)
-        # Here we create a new training phrase for each provided part.
+
         training_phrase = dialogflow.Intent.TrainingPhrase(parts=[part])
         training_phrases.append(training_phrase)
 
@@ -46,8 +54,14 @@ def main():
         payload = file.read()
     training_phrases = json.loads(payload)
 
-    for intent in training_phrases:
-        create_intent(project_id, intent, training_phrases[intent]["questions"], (training_phrases[intent]["answer"],))
+    for intent, values in training_phrases.items():
+        questions, answer = values.values()
+        print(questions, answer)
+        try:
+            create_intent(project_id, intent, questions, (answer,))
+        except InvalidArgument as error:
+            logging.error(error)
+            continue
 
 
 if __name__ == '__main__':
