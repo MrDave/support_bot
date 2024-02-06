@@ -8,26 +8,19 @@ from google.cloud import dialogflow
 from telegram.ext import Updater
 from vk_api.longpoll import VkLongPoll, VkEventType
 
-from telegram_bot import TelegramLogsHandler
+from dialog_flow_helpers import detect_intent_text
+from telegram_helpers import TelegramLogsHandler
 
 logger = logging.getLogger()
 
 
-def detect_intent_text(text, project_id, session_id):
-    session_client = dialogflow.SessionsClient()
-    session = session_client.session_path(project_id, session_id)
-    text_input = dialogflow.TextInput(text=text, language_code="RU")
-    query_input = dialogflow.QueryInput(text=text_input)
-    response = session_client.detect_intent(
-        request={"session": session, "query_input": query_input}
-    )
-    return response.query_result.fulfillment_text, response.query_result.intent.is_fallback
-
-
-def flow_dialogue(event, vk_api, project_id):
+def process_dialogue(event, vk_api, project_id):
     user_id = event.user_id
     text = event.text
-    reply_text, is_fallback = detect_intent_text(text, project_id, user_id)
+    dialogue_flow_response = detect_intent_text(text, project_id, user_id)
+    reply_text = dialogue_flow_response.query_result.fulfillment_text
+    is_fallback = dialogue_flow_response.query_result.intent.is_fallback
+
     if not is_fallback:
         vk_api.messages.send(
             user_id=user_id,
@@ -58,7 +51,7 @@ def main():
         try:
             for event in longpoll.listen():
                 if event.type == VkEventType.MESSAGE_NEW and event.to_me:
-                    flow_dialogue(event, vk_api, project_id)
+                    process_dialogue(event, vk_api, project_id)
         except Exception as e:
             logger.exception(f"Бот поддержки VK упал с ошибкой:\n")
             continue
