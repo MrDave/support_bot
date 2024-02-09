@@ -54,9 +54,8 @@ def main():
         payload = file.read()
     training_phrases = json.loads(payload)
 
-    for intent, values in training_phrases.items():
-        questions, answer = values.values()
-        print(questions, answer)
+    for intent, intent_phrases in training_phrases.items():
+        questions, answer = intent_phrases.values()
         try:
             create_intent(project_id, intent, questions, (answer,))
         except InvalidArgument as error:
